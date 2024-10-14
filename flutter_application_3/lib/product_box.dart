@@ -1,4 +1,3 @@
-// product_box.dart
 import 'package:flutter/material.dart';
 
 class ProductBox extends StatelessWidget {
@@ -7,17 +6,22 @@ class ProductBox extends StatelessWidget {
   final int price;
   final String imageUrl;
   final bool isLiked;
+  final bool isInCart;
   final VoidCallback onTap;
   final VoidCallback onToggleFavorite;
+  final VoidCallback onToggleCart;
 
-  const ProductBox({super.key, 
+  const ProductBox({
+    super.key,
     required this.name,
     required this.description,
     required this.price,
     required this.imageUrl,
     required this.isLiked,
+    required this.isInCart,
     required this.onTap,
     required this.onToggleFavorite,
+    required this.onToggleCart,
   });
 
   @override Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class ProductBox extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                       Text(description),
-                      Text("Цена: \$$price"),
+                      Text("Цена: \$price"),
                     ],
                   ),
                 ),
@@ -60,6 +64,13 @@ class ProductBox extends StatelessWidget {
                   color: isLiked ? Colors.red : Colors.grey,
                 ),
                 onPressed: onToggleFavorite,
+              ),
+              IconButton(
+                icon: Icon(
+                  isInCart ? Icons.shopping_cart : Icons.add_shopping_cart,
+                  color: isInCart ? Colors.green : Colors.grey,
+                ),
+                onPressed: onToggleCart,
               ),
             ],
           ),

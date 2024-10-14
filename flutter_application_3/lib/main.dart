@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'product_box.dart';
 import 'product_detail_page.dart';
-import 'product_creation_page.dart';
+//import 'product_creation_page.dart';
 import 'account_page.dart';
+import 'shopping_cart_page.dart';
+import 'package:flutter_cart/flutter_cart.dart';
 
-
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       debugShowCheckedModeBanner: false,
-      home: MyHomePage(),
+      home: const MyHomePage(),
     );
   }
 }
@@ -33,13 +34,14 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   List<Product> products = [];
-
   
-
   @override void initState() {
     super.initState();
     loadProducts();
   }
+
+  List<Product> get cartProducts => products.where((product) => product.isInCart).toList();
+
 
   Future<void> loadProducts() async {
     final String response = await rootBundle.loadString('lib/assets/products.json');
@@ -76,15 +78,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-
   @override Widget build(BuildContext context) {
     List<Product> displayedProducts;
 
     if (_selectedIndex == 1) {
-      // Фильтруем только избранные товары
       displayedProducts = products.where((product) => product.isLiked).toList();
     } else {
-      // Показываем все товары
       displayedProducts = products;
     }
 
@@ -92,8 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(_selectedIndex == 0 ? 'Главная страница' : 'Избранное'),
       ),
-      body: displayedProducts.isEmpty
-          ? const Center(child: Text('Нет товаров для отображения'))
+      body: displayedProducts.isEmpty ? const Center(child: Text('Нет товаров для отображения'))
           : ListView.builder(
               padding: const EdgeInsets.fromLTRB(2.0, 10.0, 2.0, 10.0),
               itemCount: displayedProducts.length,
@@ -105,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   price: product.price,
                   imageUrl: product.imageUrl,
                   isLiked: product.isLiked,
+                  isInCart: product.isInCart,
                   onTap: () {
                     Navigator.push(
                       context,
@@ -121,6 +120,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       product.toggleFavorite();
                     });
                   },
+                  onToggleCart: () {
+                    setState(() {
+                      product.toggleCart();
+                    });
+                  },
                 );
               },
             ),
@@ -129,14 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ProductCreationPage(
-                      onAdd: addProduct,
-                    ),
+                    builder: (context) => ShoppingCartPage(cartProducts: cartProducts),
                   ),
                 );
               },
               backgroundColor: Colors.blue,
-              child: const Icon(Icons.add),
+              child: const Icon(Icons.shopping_cart),
             )
           : null,
       bottomNavigationBar: BottomNavigationBar(
@@ -168,6 +170,8 @@ class Product {
   final int price;
   final String imageUrl;
   bool isLiked;
+  bool isInCart;
+  int quantity;
 
   Product({
     required this.name,
@@ -175,6 +179,8 @@ class Product {
     required this.price,
     required this.imageUrl,
     this.isLiked = false,
+    this.isInCart = false,
+    this.quantity = 1,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -184,11 +190,15 @@ class Product {
       price: json['price'],
       imageUrl: json['imageUrl'],
       isLiked: json['IsLiked'],
-    );
+      isInCart: json['isInCart'] ?? false,
+      quantity: json['quantity'] ?? 1,  );
   }
 
   void toggleFavorite() {
     isLiked = !isLiked;
   }
-}
 
+  void toggleCart(){
+    isInCart = !isInCart;
+  }
+}
