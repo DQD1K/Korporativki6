@@ -6,7 +6,7 @@ import 'product_detail_page.dart';
 //import 'product_creation_page.dart';
 import 'account_page.dart';
 import 'shopping_cart_page.dart';
-import 'package:flutter_cart/flutter_cart.dart';
+
 
 void main() => runApp(const MyApp());
 
